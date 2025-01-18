@@ -1,0 +1,73 @@
+{
+  "name": "@zhanghongping/json-sage-workflow",
+  "version": "1.0.10",
+  "description": "智能的JSON处理工作流系统，提供自动化监控、验证和转换功能",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:perf": "jest --runInBand --detectOpenHandles",
+    "build": "babel src -d dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhanghongping/json-sage-workflow.git"
+  },
+  "keywords": [
+    "json",
+    "validation",
+    "transformation",
+    "workflow",
+    "monitoring",
+    "json-schema",
+    "json-schema-generator",
+    "typescript",
+    "deepseek",
+    "ai-powered",
+    "automation",
+    "data-processing",
+    "data-validation",
+    "data-transformation",
+    "async-workflow",
+    "node-workflow",
+    "json-validator",
+    "json-parser",
+    "json-transformer",
+    "smart-cache",
+    "performance-optimization",
+    "type-generation",
+    "schema-inference",
+    "error-handling",
+    "dependency-management",
+    "async-processing"
+  ],
+  "author": "Zhang Hongping",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zhanghongping/json-sage-workflow/issues"
+  },
+  "homepage": "https://github.com/zhanghongping/json-sage-workflow#readme",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public",
+    "scope": "@zhanghongping"
+  },
+  "dependencies": {
+    "pako": "^2.1.0",
+    "zlib": "^1.0.5",
+    "axios": "^1.6.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.4",
+    "@babel/core": "^7.23.6",
+    "@babel/preset-env": "^7.23.6",
+    "jest": "^29.7.0",
+    "jest-runner-performance": "^1.1.1",
+    "lighthouse": "^11.0.0",
+    "@types/jest": "^29.5.0",
+    "jest-junit": "^16.0.0"
+  }
+}
