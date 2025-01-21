@@ -4,12 +4,15 @@
   "description": "智能的JSON处理工作流系统，提供自动化监控、验证和转换功能",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "workspaces": [
+    "cli"
+  ],
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:perf": "jest --runInBand --detectOpenHandles",
-    "build": "babel src -d dist"
+    "build": "babel src -d dist && npm run build -w cli"
   },
   "repository": {
     "type": "git",
