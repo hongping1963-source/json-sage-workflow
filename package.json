@@ -1,7 +1,7 @@
 {
-  "name": "@zhanghongping/json-sage-workflow",
-  "version": "1.0.13",
-  "description": "智能的JSON处理工作流系统，提供自动化监控、验证和转换功能",
+  "name": "@zhanghongping/json-sage-workflow-cli",
+  "version": "1.0.4",
+  "description": "An intelligent JSON processing workflow system with improved error handling and configuration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "workspaces": [
