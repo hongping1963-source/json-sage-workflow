@@ -1,8 +1,10 @@
 {
   "name": "@zhanghongping/json-sage-workflow-cli",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "CLI tool for JSON Sage Workflow - Intelligent JSON processing workflow system",
   "main": "dist/index.js",
+  "readme": "README.md",
+  "readme_en": "README_en.md",
   "bin": {
     "json-sage-workflow": "./dist/index.js"
   },
