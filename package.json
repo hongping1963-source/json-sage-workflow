@@ -1,10 +1,12 @@
 {
-  "name": "json-sage-ai",
-  "version": "1.0.0",
-  "private": true,
-  "description": "AI-powered JSON Schema Generator with Field Descriptions and Examples",
+  "name": "@zhanghongping/json-sage-workflow-cli",
+  "version": "1.0.4",
+  "description": "An intelligent JSON processing workflow system with improved error handling and configuration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "workspaces": [
+    "cli"
+  ],
   "scripts": {
     "test": "jest test/vision/",
     "test:all": "jest",
@@ -17,7 +19,10 @@
     "docs": "typedoc",
     "download:models": "node scripts/download-models.js",
     "build:wasm": "node scripts/build-wasm.js",
-    "optimize": "node scripts/optimize-model.js"
+    "optimize": "node scripts/optimize-model.js",
+    "benchmark": "ts-node test/benchmark/index.ts",
+    "type-check": "tsc --noEmit",
+    "size": "size-limit"
   },
   "repository": {
     "type": "git",

@@ -1,13 +1,13 @@
-import { JsonSageAI } from '@json-sage-ai/core';
+import { JsonSageWorkflow } from '../../..';
 import { readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { SchemaOptions } from '../types';
 import { withRetry, handleApiError } from '../utils/error-handler';
 
 export async function generateSchema(description: string, options?: SchemaOptions) {
-    const agent = new JsonSageAI({
-        deepseekApiKey: process.env.DEEPSEEK_API_KEY || '',
-        model: 'deepseek-chat',
+    const workflow = new JsonSageWorkflow({
+        apiKey: process.env.API_KEY || '',
+        model: 'gpt-4',
         maxTokens: 2048
     });
 
@@ -15,8 +15,8 @@ export async function generateSchema(description: string, options?: SchemaOption
         const result = await withRetry(
             async () => {
                 try {
-                    return await agent.generateSchema({
-                        jsonData: description,
+                    return await workflow.generateSchema({
+                        input: description,
                         options: {
                             includeDescriptions: true,
                             includeExamples: true,
@@ -29,14 +29,23 @@ export async function generateSchema(description: string, options?: SchemaOption
             },
             {
                 maxRetries: 3,
-                initialDelay: 1000,
-                maxDelay: 10000
+                retryDelay: 1000,
+                onRetry: (error, attempt) => {
+                    console.warn(`Retry attempt ${attempt} due to error: ${error.message}`);
+                }
             }
         );
 
-        return result.schema;
+        if (options?.outputFile) {
+            const outputPath = resolve(process.cwd(), options.outputFile);
+            writeFileSync(outputPath, JSON.stringify(result, null, 2));
+            console.log(`Schema saved to ${outputPath}`);
+        }
+
+        return result;
     } catch (error) {
-        throw new Error(`Failed to generate schema: ${error.message}`);
+        console.error('Failed to generate schema:', error);
+        throw error;
     }
 }
 

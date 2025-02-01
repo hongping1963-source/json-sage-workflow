@@ -41,3 +41,20 @@
   - 支持示例值生成
   - 支持多种 JSON Schema 格式
   - 添加缓存支持以提高性能
+
+## [1.0.4] - 2025-01-21
+
+### Added
+- Added centralized configuration system with `DEFAULT_CONFIG`
+- Added comprehensive error handling utilities
+- Added retry mechanism with exponential backoff
+- Added safe JSON parsing with detailed error messages
+
+### Changed
+- Improved error handling in main API functions
+- Moved prompt text to configuration file
+- Enhanced JSON parsing with better error reporting
+
+### Fixed
+- Fixed potential JSON parsing errors in command handling
+- Improved error messages for better debugging
