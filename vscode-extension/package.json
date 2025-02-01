@@ -1,0 +1,107 @@
+{
+  "name": "json-sage-ai-vscode",
+  "displayName": "JsonSageAI",
+  "description": "AI-powered JSON Schema generator and validator for VSCode",
+  "version": "1.0.0",
+  "publisher": "json-sage-ai",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:json",
+    "onLanguage:jsonc",
+    "onCommand:json-sage-ai.generateSchema",
+    "onCommand:json-sage-ai.validateSchema"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "json-sage-ai.generateSchema",
+        "title": "JsonSageAI: Generate Schema"
+      },
+      {
+        "command": "json-sage-ai.validateSchema",
+        "title": "JsonSageAI: Validate Schema"
+      },
+      {
+        "command": "json-sage-ai.convertToSchema",
+        "title": "JsonSageAI: Convert JSON to Schema"
+      }
+    ],
+    "configuration": {
+      "title": "JsonSageAI",
+      "properties": {
+        "jsonSageAI.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API Key for JsonSageAI"
+        },
+        "jsonSageAI.model": {
+          "type": "string",
+          "default": "deepseek-chat",
+          "enum": ["deepseek-chat", "deepseek-code"],
+          "description": "AI model to use"
+        },
+        "jsonSageAI.autoValidate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically validate JSON Schema"
+        }
+      }
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorLangId == json",
+          "command": "json-sage-ai.generateSchema",
+          "group": "JsonSageAI"
+        },
+        {
+          "when": "editorLangId == json",
+          "command": "json-sage-ai.validateSchema",
+          "group": "JsonSageAI"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "test": "node ./out/test/runTest.js",
+    "test:unit": "mocha -r ts-node/register 'src/test/suite/**/*.test.ts'",
+    "test:e2e": "node ./out/test/runTest.js",
+    "coverage": "nyc npm run test:unit",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts",
+    "lint:fix": "eslint src --ext ts --fix",
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "@vscode/test-electron": "^2.3.8",
+    "eslint": "^8.56.0",
+    "glob": "^10.3.10",
+    "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@json-sage-ai/core": "^1.0.0"
+  }
+}

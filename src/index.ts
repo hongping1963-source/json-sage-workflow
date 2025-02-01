@@ -32,3 +32,6 @@ export { JsonSageAutoDetector } from './core/AutoDetector';
 export { ProjectAnalyzer } from './core/ProjectAnalyzer';
 export { PerformanceOptimizer } from './core/PerformanceOptimizer';
 export { DeepSeekConfig, SchemaGenerationOptions } from './core/DeepSeekService';
+
+export * from './agent/JsonSageAI';
+export * from './types';

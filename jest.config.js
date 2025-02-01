@@ -1,19 +1,21 @@
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.js'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  roots: ['<rootDir>/src', '<rootDir>/test'],
+  testMatch: ['**/*.test.ts'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1'
+  },
+  setupFiles: ['<rootDir>/test/setup.ts'],
+  moduleFileExtensions: ['ts', 'js', 'json'],
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', {
-      isolatedModules: true // 提升性能
+    '^.+\\.ts$': ['ts-jest', {
+      tsconfig: 'tsconfig.test.json'
     }]
   },
-  maxWorkers: '50%', // 优化并行执行
-  bail: true, // 首次失败时停止
-  verbose: true,
-  collectCoverage: true,
-  coverageReporters: ['text', 'lcov'],
-  coverageDirectory: 'coverage',
-  cache: true, // 启用缓存
-  cacheDirectory: './jest-cache' // 缓存目录
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.d.ts'
+  ]
 };

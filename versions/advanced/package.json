@@ -1,0 +1,33 @@
+{
+  "name": "jsonsage-advanced",
+  "version": "2.0.0",
+  "description": "JsonSage AI Agent - Advanced Version",
+  "main": "dist/agent.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "start": "node dist/agent.js",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "dependencies": {
+    "typescript": "^4.5.0",
+    "axios": "^0.24.0",
+    "winston": "^3.3.3",
+    "ioredis": "^4.28.0",
+    "node-cache": "^5.1.2",
+    "async": "^3.2.2",
+    "jsonwebtoken": "^8.5.1",
+    "class-validator": "^0.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.7",
+    "@types/jest": "^27.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.3.1",
+    "eslint": "^8.2.0",
+    "prettier": "^2.4.1",
+    "jest": "^27.3.1",
+    "ts-jest": "^27.0.7"
+  }
+}

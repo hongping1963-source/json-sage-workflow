@@ -1,0 +1,136 @@
+:root {
+    --container-padding: 20px;
+    --input-padding-vertical: 6px;
+    --input-padding-horizontal: 4px;
+    --input-margin-vertical: 4px;
+    --input-margin-horizontal: 0;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    color: var(--vscode-foreground);
+    font-size: var(--vscode-font-size);
+    font-weight: var(--vscode-font-weight);
+    font-family: var(--vscode-font-family);
+    background-color: var(--vscode-editor-background);
+}
+
+.container {
+    padding: var(--container-padding);
+}
+
+.toolbar {
+    display: flex;
+    padding: 10px;
+    background: var(--vscode-editor-background);
+    border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    margin-right: 8px;
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.button:hover {
+    background: var(--vscode-button-hoverBackground);
+}
+
+.button i {
+    margin-right: 6px;
+}
+
+.editor-container {
+    display: flex;
+    height: calc(100vh - 100px);
+}
+
+#schema-tree {
+    width: 300px;
+    overflow: auto;
+    padding: 10px;
+    border-right: 1px solid var(--vscode-panel-border);
+}
+
+#property-editor {
+    flex: 1;
+    padding: 20px;
+    overflow: auto;
+}
+
+.schema-node {
+    margin: 4px 0;
+    padding-left: 20px;
+}
+
+.node-header {
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    cursor: pointer;
+}
+
+.node-header:hover {
+    background: var(--vscode-list-hoverBackground);
+}
+
+.node-type {
+    color: var(--vscode-symbolIcon-propertyForeground);
+    margin-right: 8px;
+}
+
+.node-name {
+    color: var(--vscode-foreground);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--vscode-input-foreground);
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+    border: 1px solid var(--vscode-input-border);
+    background: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.validation-result {
+    margin-top: 20px;
+    padding: 10px;
+}
+
+.error {
+    color: var(--vscode-errorForeground);
+    background: var(--vscode-inputValidation-errorBackground);
+    border: 1px solid var(--vscode-inputValidation-errorBorder);
+    padding: 10px;
+}
+
+.success {
+    color: var(--vscode-terminal-ansiGreen);
+    background: var(--vscode-inputValidation-infoBackground);
+    border: 1px solid var(--vscode-inputValidation-infoBorder);
+    padding: 10px;
+}

@@ -1,0 +1,9 @@
+{
+  "name": "JsonSage",
+  "version": "1.0",
+  "features": ["analysis", "insights"],
+  "config": {
+    "language": "en",
+    "mode": "auto"
+  }
+}

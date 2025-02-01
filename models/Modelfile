@@ -1,0 +1,15 @@
+FROM deepseek/deepseek-coder-14b-instruct
+
+# 设置系统提示
+SYSTEM """You are an AI programming assistant. Write code to solve problems and answer questions."""
+
+# 设置参数
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER top_k 40
+PARAMETER num_ctx 8192
+
+# 添加模板
+TEMPLATE """
+[INST] {{.Prompt}} [/INST]
+"""
