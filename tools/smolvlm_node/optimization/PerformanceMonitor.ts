@@ -1,0 +1,225 @@
+import { PerformanceMetrics, PerformanceThresholds, OptimizationSuggestion } from '../types';
+
+export class PerformanceMonitor {
+    private static instance: PerformanceMonitor;
+    private metrics: PerformanceMetrics[] = [];
+    private thresholds: PerformanceThresholds;
+
+    private constructor() {
+        this.thresholds = {
+            executionTime: 5000, // 5秒
+            tokenUsage: 4000,    // 4000 tokens
+            errorRate: 0.1,      // 10%
+            cacheHitRate: 0.6    // 60%
+        };
+    }
+
+    static getInstance(): PerformanceMonitor {
+        if (!PerformanceMonitor.instance) {
+            PerformanceMonitor.instance = new PerformanceMonitor();
+        }
+        return PerformanceMonitor.instance;
+    }
+
+    /**
+     * 记录性能指标
+     */
+    recordMetrics(metrics: PerformanceMetrics): void {
+        this.metrics.push({
+            ...metrics,
+            timestamp: Date.now()
+        });
+
+        // 保持最近1000条记录
+        if (this.metrics.length > 1000) {
+            this.metrics = this.metrics.slice(-1000);
+        }
+    }
+
+    /**
+     * 分析性能并生成优化建议
+     */
+    analyzePerformance(): OptimizationSuggestion[] {
+        const suggestions: OptimizationSuggestion[] = [];
+        
+        if (this.metrics.length === 0) {
+            return suggestions;
+        }
+
+        // 计算平均指标
+        const avgMetrics = this.calculateAverageMetrics();
+
+        // 检查执行时间
+        if (avgMetrics.executionTime > this.thresholds.executionTime) {
+            suggestions.push({
+                type: 'performance',
+                metric: 'executionTime',
+                severity: 'warning',
+                message: '平均执行时间过长',
+                currentValue: avgMetrics.executionTime,
+                threshold: this.thresholds.executionTime,
+                suggestion: '考虑增加缓存或优化数据处理逻辑'
+            });
+        }
+
+        // 检查Token使用量
+        if (avgMetrics.tokenUsage > this.thresholds.tokenUsage) {
+            suggestions.push({
+                type: 'resource',
+                metric: 'tokenUsage',
+                severity: 'warning',
+                message: 'Token使用量较高',
+                currentValue: avgMetrics.tokenUsage,
+                threshold: this.thresholds.tokenUsage,
+                suggestion: '考虑优化提示词或减少输入数据大小'
+            });
+        }
+
+        // 检查错误率
+        const errorRate = this.calculateErrorRate();
+        if (errorRate > this.thresholds.errorRate) {
+            suggestions.push({
+                type: 'reliability',
+                metric: 'errorRate',
+                severity: 'error',
+                message: '错误率过高',
+                currentValue: errorRate,
+                threshold: this.thresholds.errorRate,
+                suggestion: '检查错误模式并改进错误处理'
+            });
+        }
+
+        // 检查缓存命中率
+        const cacheHitRate = this.calculateCacheHitRate();
+        if (cacheHitRate < this.thresholds.cacheHitRate) {
+            suggestions.push({
+                type: 'optimization',
+                metric: 'cacheHitRate',
+                severity: 'info',
+                message: '缓存命中率较低',
+                currentValue: cacheHitRate,
+                threshold: this.thresholds.cacheHitRate,
+                suggestion: '考虑调整缓存策略或增加缓存容量'
+            });
+        }
+
+        return suggestions;
+    }
+
+    /**
+     * 获取性能趋势分析
+     */
+    getPerformanceTrends() {
+        const timeRanges = [
+            { label: '最近1小时', duration: 60 * 60 * 1000 },
+            { label: '最近24小时', duration: 24 * 60 * 60 * 1000 },
+            { label: '最近7天', duration: 7 * 24 * 60 * 60 * 1000 }
+        ];
+
+        const now = Date.now();
+        return timeRanges.map(range => {
+            const rangeMetrics = this.metrics.filter(m => 
+                now - m.timestamp < range.duration
+            );
+
+            if (rangeMetrics.length === 0) {
+                return {
+                    timeRange: range.label,
+                    metrics: null
+                };
+            }
+
+            return {
+                timeRange: range.label,
+                metrics: this.calculateAverageMetrics(rangeMetrics)
+            };
+        });
+    }
+
+    /**
+     * 更新性能阈值
+     */
+    updateThresholds(newThresholds: Partial<PerformanceThresholds>): void {
+        this.thresholds = {
+            ...this.thresholds,
+            ...newThresholds
+        };
+    }
+
+    /**
+     * 获取当前阈值
+     */
+    getThresholds(): PerformanceThresholds {
+        return { ...this.thresholds };
+    }
+
+    /**
+     * 计算平均指标
+     */
+    private calculateAverageMetrics(metrics = this.metrics): PerformanceMetrics {
+        const sum = metrics.reduce((acc, curr) => ({
+            executionTime: acc.executionTime + curr.executionTime,
+            tokenUsage: acc.tokenUsage + curr.tokenUsage,
+            cacheHits: acc.cacheHits + curr.cacheHits,
+            cacheMisses: acc.cacheMisses + curr.cacheMisses,
+            successCount: acc.successCount + curr.successCount,
+            errorCount: acc.errorCount + curr.errorCount,
+            timestamp: 0
+        }));
+
+        return {
+            executionTime: sum.executionTime / metrics.length,
+            tokenUsage: sum.tokenUsage / metrics.length,
+            cacheHits: sum.cacheHits / metrics.length,
+            cacheMisses: sum.cacheMisses / metrics.length,
+            successCount: sum.successCount / metrics.length,
+            errorCount: sum.errorCount / metrics.length,
+            timestamp: Date.now()
+        };
+    }
+
+    /**
+     * 计算错误率
+     */
+    private calculateErrorRate(): number {
+        const totalRequests = this.metrics.reduce((sum, m) => 
+            sum + m.successCount + m.errorCount, 0
+        );
+        
+        if (totalRequests === 0) {
+            return 0;
+        }
+
+        const totalErrors = this.metrics.reduce((sum, m) => 
+            sum + m.errorCount, 0
+        );
+
+        return totalErrors / totalRequests;
+    }
+
+    /**
+     * 计算缓存命中率
+     */
+    private calculateCacheHitRate(): number {
+        const totalCacheAccesses = this.metrics.reduce((sum, m) => 
+            sum + m.cacheHits + m.cacheMisses, 0
+        );
+        
+        if (totalCacheAccesses === 0) {
+            return 0;
+        }
+
+        const totalHits = this.metrics.reduce((sum, m) => 
+            sum + m.cacheHits, 0
+        );
+
+        return totalHits / totalCacheAccesses;
+    }
+
+    /**
+     * 清除历史指标
+     */
+    clearMetrics(): void {
+        this.metrics = [];
+    }
+}
