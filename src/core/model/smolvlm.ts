@@ -6,6 +6,8 @@ import { Quantizer } from '../optimization/quantizer';
 import { ModelLoader } from './loader';
 import { ModelProcessor } from './processor';
 import sharp from 'sharp';
+import { BatchOptimizer } from '../optimization/batch';
+import { CacheManager } from '../optimization/cache';
 
 /**
  * SmolVLM模型实现
@@ -16,23 +18,64 @@ export class SmolVLM extends BaseModel {
   private memoryManager: MemoryManager;
   private quantizer: Quantizer;
   private processor: ModelProcessor;
+  private resourceTracker: Set<any> = new Set();
+  private disposed: boolean = false;
+  private batchOptimizer: BatchOptimizer | null = null;
+  private cacheManager: CacheManager;
 
   constructor(config: ModelConfig) {
     super(config);
     this.memoryManager = new MemoryManager(config.memoryLimit);
     this.quantizer = new Quantizer();
     this.processor = new ModelProcessor();
+    this.cacheManager = new CacheManager();
+  }
+
+  private trackResource(resource: any) {
+    this.resourceTracker.add(resource);
+  }
+
+  private untrackResource(resource: any) {
+    this.resourceTracker.delete(resource);
+  }
+
+  private async disposeResource(resource: any) {
+    try {
+      if (resource && typeof resource.dispose === 'function') {
+        await resource.dispose();
+      }
+    } catch (error) {
+      console.warn(`Failed to dispose resource: ${error.message}`);
+    }
   }
 
   async load(): Promise<void> {
+    if (this.disposed) {
+      throw new Error('Model has been disposed');
+    }
+
     try {
-      // 1. 初始化WASM Worker
+      // 1. 尝试从缓存加载模型
+      const cachedModel = await this.cacheManager.getCachedModel(this.config.modelPath);
+      if (cachedModel) {
+        this.session = await ort.InferenceSession.create(cachedModel, {
+          executionProviders: ['webgl'],
+          graphOptimizationLevel: 'all',
+          enableMemPattern: true,
+          executionMode: 'parallel'
+        });
+        this.trackResource(this.session);
+        return;
+      }
+
+      // 2. 初始化WASM Worker
       if (this.config.deviceType === 'cpu') {
         this.wasmWorker = createWasmWorker();
+        this.trackResource(this.wasmWorker);
         await this.wasmWorker.initialize(this.config);
       }
 
-      // 2. 创建ONNX会话
+      // 3. 创建ONNX会话
       const modelBuffer = await this.loadModelFile(this.config.modelPath);
       this.session = await ort.InferenceSession.create(modelBuffer, {
         executionProviders: ['webgl'],
@@ -40,13 +83,25 @@ export class SmolVLM extends BaseModel {
         enableMemPattern: true,
         executionMode: 'parallel'
       });
+      this.trackResource(this.session);
 
-      // 3. 应用优化
+      // 4. 缓存模型
+      await this.cacheManager.cacheModel(this.config.modelPath, modelBuffer);
+
+      // 5. 初始化批处理优化器
+      this.batchOptimizer = new BatchOptimizer(this.session, {
+        maxBatchSize: 4,
+        dynamicBatching: true,
+        timeout: 100
+      });
+      this.trackResource(this.batchOptimizer);
+
+      // 6. 应用优化
       if (this.config.quantization !== 'none') {
         await this.optimize();
       }
 
-      // 4. 预热模型
+      // 7. 预热模型
       await this.warmup();
 
     } catch (error) {
@@ -55,15 +110,29 @@ export class SmolVLM extends BaseModel {
   }
 
   async predict(input: any): Promise<any> {
+    if (this.disposed) {
+      throw new Error('Model has been disposed');
+    }
+
     try {
       const startTime = performance.now();
 
-      // 1. 预处理输入
+      // 1. 检查缓存
+      const cachedResult = this.cacheManager.getCachedInferenceResult(input);
+      if (cachedResult) {
+        this.metrics.inferenceTime = performance.now() - startTime;
+        return cachedResult;
+      }
+
+      // 2. 预处理输入
       const processedInput = await this.preprocessInput(input);
 
-      // 2. 执行推理
+      // 3. 执行推理
       let result;
-      if (this.config.deviceType === 'cpu' && this.wasmWorker) {
+      if (this.batchOptimizer && this.session) {
+        // 使用批处理优化器
+        result = await this.batchOptimizer.addToBatch(processedInput);
+      } else if (this.config.deviceType === 'cpu' && this.wasmWorker) {
         // 使用WASM进行推理
         result = await this.wasmWorker.predict(processedInput);
       } else {
@@ -73,10 +142,13 @@ export class SmolVLM extends BaseModel {
         result = outputMap.output.data;
       }
 
-      // 3. 后处理结果
+      // 4. 后处理结果
       const processedResult = await this.postprocessOutput(result);
 
-      // 4. 更新性能指标
+      // 5. 缓存结果
+      this.cacheManager.cacheInferenceResult(input, processedResult);
+
+      // 6. 更新性能指标
       this.metrics.inferenceTime = performance.now() - startTime;
       this.updateMetrics();
 
@@ -87,22 +159,45 @@ export class SmolVLM extends BaseModel {
   }
 
   async dispose(): Promise<void> {
+    if (this.disposed) {
+      return;
+    }
+
     try {
-      // 1. 释放ONNX会话
+      // 1. 标记为已释放
+      this.disposed = true;
+
+      // 2. 释放所有跟踪的资源
+      const resources = Array.from(this.resourceTracker);
+      await Promise.all(resources.map(resource => this.disposeResource(resource)));
+      this.resourceTracker.clear();
+
+      // 3. 释放ONNX会话
       if (this.session) {
         await this.session.dispose();
         this.session = null;
       }
 
-      // 2. 释放WASM Worker
+      // 4. 释放WASM Worker
       if (this.wasmWorker) {
         await this.wasmWorker.dispose();
         this.wasmWorker = null;
       }
 
-      // 3. 释放内存
+      // 5. 释放批处理优化器
+      if (this.batchOptimizer) {
+        this.batchOptimizer.dispose();
+        this.batchOptimizer = null;
+      }
+
+      // 6. 释放内存
       await this.memoryManager.releaseAll();
 
+      // 7. 清理缓存
+      this.cacheManager.clear();
+
+      // 8. 更新指标
+      this.updateMetrics();
     } catch (error) {
       throw new Error(`Failed to dispose SmolVLM: ${error.message}`);
     }
