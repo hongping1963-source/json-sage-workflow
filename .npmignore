@@ -1,0 +1,34 @@
+# Source
+src/
+test/
+examples/
+docs/
+
+# Config files
+.eslintrc
+.prettierrc
+.gitignore
+.github/
+.husky/
+jest.config.js
+tsconfig.json
+tsconfig.test.json
+
+# Development files
+*.log
+*.tsbuildinfo
+coverage/
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+
+# Build artifacts
+benchmark-results.json
+*.map
